@@ -1,6 +1,9 @@
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
-</IfModule>
+Options -Indexes
+RewriteEngine On
+
+# Abaikan jika yang diakses adalah file atau folder nyata (seperti CSS/Gambar)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Arahkan sisanya ke index.php
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
