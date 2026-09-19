@@ -15,5 +15,9 @@ require_once 'app/Routes/web.php';
 Route::run();
 
 //bisa kah zak
+<<<<<<< HEAD
 //ada kah zik
 //apalagi bre
+=======
+//ada kah zik
+>>>>>>> ed06276420b74262ff6e5e3f28220180498164ca
