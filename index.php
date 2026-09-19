@@ -15,3 +15,4 @@ require_once 'app/Routes/web.php';
 Route::run();
 
 //bisa kah zak
+//ada kah zik
