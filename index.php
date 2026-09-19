@@ -14,4 +14,4 @@ require_once 'app/Routes/web.php';
 // 4. Jalankan router
 Route::run();
 
-//astagfirullah
+//bisa kah zak
