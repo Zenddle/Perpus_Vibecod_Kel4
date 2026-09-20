@@ -14,3 +14,6 @@ $router->get('/dashboard', [DashboardController::class, 'index'], ['auth']);
 
 $router->get('/admin', [AdminController::class, 'index'], ['auth', 'staff']);
 
+// Tambah user: hanya admin (petugas tidak boleh)
+$router->get('/admin/users/create', [AdminController::class, 'createUser'], ['auth', 'admin']);
+$router->post('/admin/users',       [AdminController::class, 'storeUser'],  ['auth', 'admin']);

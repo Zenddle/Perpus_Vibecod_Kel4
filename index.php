@@ -1,5 +1,6 @@
 <?php
 // Front controller: semua request masuk lewat sini (lihat .htaccess)
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
 
 define('ROOT_PATH', __DIR__);
