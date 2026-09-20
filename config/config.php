@@ -1,3 +1,11 @@
 <?php
+namespace App\Config;
 
-define('BASE_PATH', dirname(__DIR__));
+// Membaca bagian 'db' dari config/config.php
+class Database
+{
+    public static function settings(): array
+    {
+        return (require dirname(__DIR__, 2) . '/config/config.php')['db'];
+    }
+}

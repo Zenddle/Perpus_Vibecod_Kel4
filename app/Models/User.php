@@ -1,15 +1,19 @@
 <?php
+namespace App\Models;
 
-class User {
-    private $table = 'users';
-    private $db;
+use App\Core\Database;
 
-    public function __construct() {
-        $this->db = new Database();
+class User
+{
+    public static function findByNim(string $nim): ?array
+    {
+        $st = Database::connect()->prepare('SELECT * FROM users WHERE nim = ? LIMIT 1');
+        $st->execute([$nim]);
+        return $st->fetch() ?: null;
     }
 
-    public function getAllUsers() {
-        $this->db->query('SELECT * FROM ' . $this->table);
-        return $this->db->resultSet();
+    public static function all(): array
+    {
+        return Database::connect()->query('SELECT nim, nama, peran FROM users ORDER BY nama')->fetchAll();
     }
 }

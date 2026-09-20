@@ -1,12 +1,27 @@
 <?php
+namespace App\Core;
 
-class Controller {
-    public function view($view, $data = []) {
-        require_once 'app/views/' . $view . '.php';
+class Controller
+{
+    // Render view di dalam layout. $view contoh: 'auth/login'
+    protected function view(string $view, array $data = [], string $layout = 'main'): void
+    {
+        extract($data);
+        ob_start();
+        require APP_PATH . "/Views/{$view}.php";
+        $content = ob_get_clean();
+        require APP_PATH . "/Views/layouts/{$layout}.php";
     }
 
-    public function model($model) {
-        require_once 'app/models/' . $model . '.php';
-        return new $model();
+    protected function redirect(string $path): never
+    {
+        header('Location: ' . url($path));
+        exit;
+    }
+
+    // Pesan sekali tampil (flash)
+    protected function flash(string $key, string $message): void
+    {
+        $_SESSION['flash'][$key] = $message;
     }
 }
