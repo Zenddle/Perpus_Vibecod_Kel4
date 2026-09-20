@@ -10,30 +10,21 @@ class AuthController extends Controller
     // Hash palsu agar waktu respons sama, baik NIM ada maupun tidak
     private const DUMMY_HASH = '$2y$10$X6Gz3qM5Rj0IoaWJbZFfzOnN5mKvxZvip7smzCskfjbEtvG.7BvKm';
 
-    private function startSessionIfNeeded(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-    }
-
     public function showLogin(): void
     {
-        $this->startSessionIfNeeded();
         $this->view('auth/login', ['title' => 'Masuk'], 'guest');
         unset($_SESSION['old']); // input lama hanya dipakai sekali
     }
 
     public function login(): void
     {
-        $this->startSessionIfNeeded();
-
         $nim      = trim($_POST['nim'] ?? '');
         $password = (string)($_POST['password'] ?? '');
+        $sebagai  = ($_POST['sebagai'] ?? '') === 'admin' ? 'admin' : 'siswa';
 
         if ($nim === '' || $password === '') {
-            $_SESSION['old'] = ['nim' => $nim];
-            $this->flash('error', 'NIM dan password wajib diisi.');
+            $_SESSION['old'] = ['nim' => $nim, 'sebagai' => $sebagai];
+            $this->flash('error', 'ID dan password wajib diisi.');
             $this->redirect('/login');
         }
 
@@ -42,8 +33,17 @@ class AuthController extends Controller
 
         // password_verify selalu dijalankan supaya tidak bisa menebak NIM lewat waktu respons
         if (!password_verify($password, $hash) || !$user) {
-            $_SESSION['old'] = ['nim' => $nim]; // password tidak diisi ulang
-            $this->flash('error', 'NIM atau password salah.');
+            $_SESSION['old'] = ['nim' => $nim, 'sebagai' => $sebagai]; // password tidak diisi ulang
+            $this->flash('error', 'ID atau password salah.');
+            $this->redirect('/login');
+        }
+
+        // Login harus sesuai pilihan: akun siswa tidak bisa masuk lewat tab admin, dan sebaliknya
+        if ($user['peran'] !== $sebagai) {
+            $_SESSION['old'] = ['nim' => $nim, 'sebagai' => $sebagai];
+            $this->flash('error', $sebagai === 'admin'
+                ? 'Akun ini bukan akun admin. Pilih "Siswa" untuk masuk.'
+                : 'Akun ini adalah akun admin. Pilih "Admin" untuk masuk.');
             $this->redirect('/login');
         }
 
@@ -56,8 +56,6 @@ class AuthController extends Controller
 
     public function logout(): void
     {
-        $this->startSessionIfNeeded();
-
         $_SESSION = [];
         session_destroy();
 

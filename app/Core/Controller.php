@@ -24,4 +24,10 @@ class Controller
     {
         $_SESSION['flash'][$key] = $message;
     }
+
+    protected function notFound(): never
+    {
+        http_response_code(404);
+        exit('404 - Data tidak ditemukan');
+    }
 }

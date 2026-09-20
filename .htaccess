@@ -4,4 +4,4 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]
 
 # Lindungi folder internal
-RedirectMatch 403 ^/?(.*/)?(app|config)/
+RedirectMatch 403 ^/?(.*/)?(app|config|database)/

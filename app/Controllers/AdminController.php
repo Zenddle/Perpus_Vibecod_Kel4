@@ -2,59 +2,58 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\User;
 use App\Models\Borrowing;
 
+// Ringkasan, persetujuan, dan riwayat peminjaman
 class AdminController extends Controller
 {
-    // 1. Method index() yang sudah digabungkan secara utuh
     public function index(): void
     {
         $this->view('admin/index', [
-            'title' => 'Dashboard Admin',
-            'stats' => Borrowing::stats(),
-            'users' => User::all(),
+            'title'    => 'Dashboard Admin',
+            'stats'    => Borrowing::stats(),
+            'pending'  => Borrowing::pending(),
+            'approved' => Borrowing::approvedList(),
+            'durasi'   => (int)config('durasi_default', 7),
         ]);
     }
 
-    // 2. Tampilkan form tambah user
-    public function createUser(): void
+    public function approve(string $id): void
     {
-        $this->view('admin/create_user', ['title' => 'Tambah User']);
-        unset($_SESSION['old']); // input lama hanya dipakai sekali
+        $hari = (int)($_POST['hari'] ?? 0);
+        if ($hari < 1 || $hari > 60) {
+            $this->flash('error', 'Lama peminjaman harus 1-60 hari.');
+            $this->redirect('/admin');
+        }
+
+        $error = Borrowing::approve((int)$id, $hari, $_SESSION['user']['nim']);
+        $error ? $this->flash('error', $error) : $this->flash('success', "Peminjaman disetujui ({$hari} hari).");
+        $this->redirect('/admin');
     }
 
-    // 3. Proses form tambah user
-    public function storeUser(): void
+    public function reject(string $id): void
     {
-        $nim      = trim($_POST['nim'] ?? '');
-        $nama     = trim($_POST['nama'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $peran    = $_POST['peran'] ?? '';
-
-        $error = null;
-        if ($nim === '' || $nama === '' || $password === '') {
-            $error = 'NIM, nama, dan password wajib diisi.';
-        } elseif (!preg_match('/^[A-Za-z0-9]{1,20}$/', $nim)) {
-            $error = 'NIM hanya huruf/angka, maksimal 20 karakter.';
-        } elseif (strlen($nama) > 150) {
-            $error = 'Nama maksimal 150 karakter.';
-        } elseif (strlen($password) < 6) {
-            $error = 'Password minimal 6 karakter.';
-        } elseif (!in_array($peran, ['admin', 'petugas', 'anggota'], true)) {
-            $error = 'Peran tidak valid.';
-        } elseif (User::findByNim($nim)) {
-            $error = "NIM {$nim} sudah terdaftar.";
-        }
-
-        if ($error) {
-            $_SESSION['old'] = ['nim' => $nim, 'nama' => $nama, 'peran' => $peran]; // password tidak diisi ulang
-            $this->flash('error', $error);
-            $this->redirect('/admin/users/create');
-        }
-
-        User::create($nim, $nama, $password, $peran);
-        $this->flash('success', "User {$nama} ({$nim}) berhasil ditambahkan.");
+        Borrowing::reject((int)$id, $_SESSION['user']['nim'])
+            ? $this->flash('success', 'Pengajuan ditolak.')
+            : $this->flash('error', 'Pengajuan tidak ditemukan atau sudah diproses.');
         $this->redirect('/admin');
+    }
+
+    public function returned(string $id): void
+    {
+        Borrowing::markReturned((int)$id, $_SESSION['user']['nim'])
+            ? $this->flash('success', 'Buku ditandai sudah dikembalikan.')
+            : $this->flash('error', 'Data tidak ditemukan atau sudah dikembalikan.');
+        $this->redirect('/admin');
+    }
+
+    public function history(): void
+    {
+        $status = $_GET['status'] ?? '';
+        $this->view('admin/borrowings', [
+            'title'   => 'Riwayat Peminjaman',
+            'rows'    => Borrowing::history($status),
+            'status'  => $status,
+        ]);
     }
 }

@@ -18,7 +18,7 @@ class AuthMiddleware
             'guest' => self::guest(),
             'auth'  => self::auth(),
             'admin' => self::role(['admin']),
-            'staff' => self::role(['admin', 'petugas']),
+            'siswa' => self::siswa(),
             default => null,
         };
     }
@@ -44,25 +44,30 @@ class AuthMiddleware
     private static function role(array $allowed): void
     {
         self::auth();
-        
-        // Checks both 'peran' and 'role' to avoid database column mismatch
-        $userRole = $_SESSION['user']['peran'] ?? $_SESSION['user']['role'] ?? '';
 
-        if (!in_array($userRole, $allowed, true)) {
+        if (!in_array($_SESSION['user']['peran'] ?? '', $allowed, true)) {
             http_response_code(403);
             exit('403 - Akses ditolak');
         }
     }
 
-    // Admin & petugas ke /admin, anggota ke /dashboard
+    // Halaman siswa: admin diarahkan ke dashboard admin
+    private static function siswa(): void
+    {
+        self::auth();
+
+        if (($_SESSION['user']['peran'] ?? '') !== 'siswa') {
+            self::redirectHome();
+        }
+    }
+
+    // Admin ke /admin, siswa ke /dashboard
     public static function redirectHome(): never
     {
         self::initSession();
-        
-        $userRole = $_SESSION['user']['peran'] ?? $_SESSION['user']['role'] ?? '';
-        $staff = in_array($userRole, ['admin', 'petugas'], true);
-        
-        header('Location: ' . url($staff ? '/admin' : '/dashboard'));
+
+        $isAdmin = ($_SESSION['user']['peran'] ?? '') === 'admin';
+        header('Location: ' . url($isAdmin ? '/admin' : '/dashboard'));
         exit;
     }
 }
