@@ -38,3 +38,9 @@ spl_autoload_register(function (string $class) {
 $router = new App\Core\Router();
 require APP_PATH . '/Routes/web.php';
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+//satu
+//dua
+//tiga
+//empat
+//lima
+//enam
