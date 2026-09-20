@@ -20,7 +20,7 @@ class Route {
             $controllerName = $target[0];
             $action = $target[1];
 
-            require_once 'app/controllers/' . $controllerName . '.php';
+            require_once __DIR__ . 'app/controllers/' . $controllerName . '.php';
             $controller = new $controllerName();
             $controller->$action();
         } else {
