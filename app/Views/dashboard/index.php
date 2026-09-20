@@ -1,12 +1,19 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $data['judul']; ?></title>
-</head>
-<body>
-    <h1>Template MVC</h1>
-    <p>Framework yang bisa digunakan</p>
-</body>
-</html>
+<h2>Dashboard <?= e($_SESSION['user']['peran']) ?></h2>
+<p>
+  Buku: <strong><?= $stats['buku'] ?></strong> &middot;
+  Anggota: <strong><?= $stats['anggota'] ?></strong> &middot;
+  Pengajuan pending: <strong><?= $stats['pengajuan'] ?></strong> &middot;
+  Sedang dipinjam: <strong><?= $stats['dipinjam'] ?></strong>
+</p>
+
+<h3>Pengguna</h3>
+<table>
+  <tr><th>NIM</th><th>Nama</th><th>Peran</th></tr>
+  <?php foreach ($users as $u): ?>
+    <tr>
+      <td><?= e($u['nim']) ?></td>
+      <td><?= e($u['nama']) ?></td>
+      <td><?= e($u['peran']) ?></td>
+    </tr>
+  <?php endforeach; ?>
+</table>

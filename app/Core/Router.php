@@ -1,20 +1,26 @@
 <?php
+namespace App\Core;
 
-class Route {
-    private static $routes = [];
+class Router
+{
+    private array $routes = [];
 
-    public static function get($url, $target) {
-        self::$routes['GET'][trim($url, '/')] = $target;
+    // $middleware: array nama middleware, mis. ['auth'] atau ['auth','admin']
+    public function get(string $path, array $handler, array $middleware = []): void
+    {
+        $this->routes['GET'][$path] = [$handler, $middleware];
     }
 
-    public static function post($url, $target) {
-        self::$routes['POST'][trim($url, '/')] = $target;
+    public function post(string $path, array $handler, array $middleware = []): void
+    {
+        $this->routes['POST'][$path] = [$handler, $middleware];
     }
 
-    public static function run() {
-        $method = $_SERVER['REQUEST_METHOD'];
-        $url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : '';
+    public function dispatch(string $uri, string $method): void
+    {
+        $path = '/' . trim(parse_url($uri, PHP_URL_PATH) ?? '/', '/');
 
+<<<<<<< HEAD
         if (isset(self::$routes[$method][$url])) {
             $target = self::$routes[$method][$url];
             $controllerName = $target[0];
@@ -28,6 +34,26 @@ class Route {
         } else {
             http_response_code(404);
             echo "404 - Halaman Tidak Ditemukan";
+=======
+        // Buang folder proyek (mis. /MVC-polosan) dari URL
+        if (BASE_PATH !== '' && str_starts_with($path, BASE_PATH)) {
+            $path = '/' . trim(substr($path, strlen(BASE_PATH)), '/');
+>>>>>>> d80d0347eedc134252bcd32e4dd4b3210c948e17
         }
+
+        $route = $this->routes[$method][$path] ?? null;
+        if (!$route) {
+            http_response_code(404);
+            echo '404 - Halaman tidak ditemukan';
+            return;
+        }
+
+        [$handler, $middleware] = $route;
+        foreach ($middleware as $name) {
+            AuthMiddleware::handle($name);
+        }
+
+        [$class, $action] = $handler;
+        (new $class())->$action();
     }
 }
