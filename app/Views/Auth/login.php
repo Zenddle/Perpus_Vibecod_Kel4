@@ -34,7 +34,7 @@
         <?php endif; ?>
 
         <!-- Form mengarah ke rute POST /login -->
-        <form action="/login" method="POST">
+        <form action="<?= BASE_URL ?>/login" method="POST">
             <div class="input-group">
                 <label for="username">Username / NIM</label>
                 <!-- Tambahkan atribut name agar data bisa ditangkap oleh $_POST -->

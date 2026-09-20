@@ -20,7 +20,9 @@ class Route {
             $controllerName = $target[0];
             $action = $target[1];
 
-            require_once __DIR__ . 'app/controllers/' . $controllerName . '.php';
+            // Path diperbaiki: naik satu folder ke app/, lalu masuk ke Controllers/
+            require_once __DIR__ . '/../Controllers/' . $controllerName . '.php';
+            
             $controller = new $controllerName();
             $controller->$action();
         } else {
